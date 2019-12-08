@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        String memoryString = Files.readAllLines(Paths.get(Main.class.getResource("/day_2_1_input.txt").toURI()), StandardCharsets.UTF_8).get(0);
+        String memoryString = Files.readAllLines(Paths.get(Main.class.getResource("/day_5_1_input.txt").toURI()), StandardCharsets.UTF_8).get(0);
 
         Integer[] memory = Arrays.stream(memoryString.split(",")).map(Integer::parseInt).toArray(Integer[]::new);
 
