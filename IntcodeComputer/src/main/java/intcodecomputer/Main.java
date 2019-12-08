@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class Main {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        String memoryString = Files.readAllLines(Paths.get(Main.class.getResource("/day_5_1_input.txt").toURI()), StandardCharsets.UTF_8).get(0);
+        String memoryString = Files.readAllLines(Paths.get(Main.class.getResource("/day_5_input.txt").toURI()), StandardCharsets.UTF_8).get(0);
 
         Integer[] memory = Arrays.stream(memoryString.split(",")).map(Integer::parseInt).toArray(Integer[]::new);
 
@@ -21,8 +21,8 @@ public class Main {
             int i = 0;
             while (i < memory.length) {
                 var instruction = Instruction.getAtPointer(i, memory);
-                instruction.executeOnMemory(memory);
-                i += instruction.getLength();
+                i = instruction.executeOnMemory(i, memory);
+                // printMemory(memory, i);
             }
         } catch (ProgramHaltedException e) {
             System.out.println(e.getMessage());
@@ -32,4 +32,13 @@ public class Main {
             System.out.println("VERB: " + memory[2]);
         }
     }
+
+    private static void printMemory(Integer[] memory, int pointer) {
+        System.out.println("MEMORY {" + memory.length + "}, POINTER: " + pointer);
+        for (Integer integer : memory) {
+            System.out.print(integer + ",");
+        }
+        System.out.println();
+    }
+
 }

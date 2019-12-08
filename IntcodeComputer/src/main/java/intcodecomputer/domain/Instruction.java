@@ -22,6 +22,12 @@ public class Instruction {
         this.outputAddress = outputAddress;
     }
 
+    public Instruction(Integer opcode, Integer[] paramAddresses, Integer[] paramModes) {
+        this.opcode = opcode;
+        this.paramAddresses = paramAddresses;
+        this.paramModes = paramModes;
+    }
+
     public Instruction(Integer opcode, Integer[] paramAddresses, Integer[] paramModes, Integer outputAddress) {
         this.opcode = opcode;
         this.paramAddresses = paramAddresses;
@@ -33,25 +39,44 @@ public class Instruction {
         return 1 + (paramAddresses != null ? paramAddresses.length : 0) + (outputAddress != null ? 1 : 0);
     }
 
-    public void executeOnMemory(Integer[] memory) {
+    public int executeOnMemory(int pointer, Integer[] memory) {
         switch (opcode) {
             case 1:
-                memory[this.outputAddress] = getParamValue(memory, 0) +getParamValue(memory, 1);
-                break;
+                memory[this.outputAddress] = getParamValue(memory, 0) + getParamValue(memory, 1);
+                return pointer + this.getLength();
             case 2:
                 memory[this.outputAddress] = getParamValue(memory, 0) * getParamValue(memory, 1);
-                break;
+                return pointer + this.getLength();
             case 3:
+                System.out.print("INPUT NEEDED: ");
                 int input = Integer.parseInt(SCANNER.nextLine());
                 memory[this.outputAddress] = input;
-                break;
+                return pointer + this.getLength();
             case 4:
-                System.out.println(memory[this.outputAddress]);
-                break;
+                System.out.println("OUTPUT GENERATED: " + getParamValue(memory, 0));
+                return pointer + this.getLength();
+            case 5:
+                return getParamValue(memory, 0) != 0 ? getParamValue(memory, 1) : pointer + this.getLength();
+            case 6:
+                return getParamValue(memory, 0) == 0 ? getParamValue(memory, 1) : pointer + this.getLength();
+            case 7:
+                if (getParamValue(memory, 0) < getParamValue(memory, 1)) {
+                    memory[this.outputAddress] = 1;
+                } else {
+                    memory[this.outputAddress] = 0;
+                }
+                return pointer + this.getLength();
+            case 8:
+                if (getParamValue(memory, 0).equals(getParamValue(memory, 1))) {
+                    memory[this.outputAddress] = 1;
+                } else {
+                    memory[this.outputAddress] = 0;
+                }
+                return pointer + this.getLength();
             case 99:
                 throw new ProgramHaltedException();
             default:
-                throw new RuntimeException("Unknown optcode found during execution-time!");
+                throw new RuntimeException(String.format("Unknown opcode '%s' found during execution-time!", opcode));
         }
     }
 
@@ -62,7 +87,7 @@ public class Instruction {
             case 1:
                 return paramAddresses[paramIndex];
             default:
-                throw new RuntimeException("Unknown parameter mode: " + paramModes[paramIndex]);
+                throw new RuntimeException(String.format("Unknown parameter mode: %s", paramModes[paramIndex]));
         }
     }
 
@@ -73,25 +98,32 @@ public class Instruction {
 
         switch (opcode) {
             case 1:
-                return new Instruction(1,
-                        new Integer[]{memory[pointer + 1], memory[pointer + 2]},
-                        new Integer[]{param1Mode, param2Mode},
-                        memory[pointer + 3]
-                );
             case 2:
-                return new Instruction(2,
+            case 7:
+            case 8:
+                return new Instruction(opcode,
                         new Integer[]{memory[pointer + 1], memory[pointer + 2]},
                         new Integer[]{param1Mode, param2Mode},
                         memory[pointer + 3]
                 );
             case 3:
-                return new Instruction(3, memory[pointer + 1]);
+                return new Instruction(opcode, memory[pointer + 1]);
             case 4:
-                return new Instruction(4, memory[pointer + 1]);
+                return new Instruction(opcode,
+                        new Integer[]{memory[pointer + 1]},
+                        new Integer[]{param1Mode}
+                );
+            case 5:
+            case 6:
+                return new Instruction(opcode,
+                        new Integer[]{memory[pointer + 1], memory[pointer + 2]},
+                        new Integer[]{param1Mode, param2Mode},
+                        null
+                );
             case 99:
                 return new Instruction(99);
             default:
-                throw new RuntimeException("Unknown optcode found during parse-time!");
+                throw new RuntimeException(String.format("Unknown opcode '%s' found during parse-time!", opcode));
         }
     }
 
