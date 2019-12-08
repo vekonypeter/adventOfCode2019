@@ -3,11 +3,12 @@ package orbits.domain;
 public class SpaceObject {
 
     private String id;
+    private String objectToOrbitId;
     private SpaceObject objectToOrbit;
 
-    public SpaceObject(String id, SpaceObject objectToOrbit) {
+    public SpaceObject(String id, String objectToOrbitId) {
         this.id = id;
-        this.objectToOrbit = objectToOrbit;
+        this.objectToOrbitId = objectToOrbitId;
     }
 
     public int getNumberOfOrbits() {
@@ -20,6 +21,10 @@ public class SpaceObject {
 
     public String getId() {
         return id;
+    }
+
+    public String getObjectToOrbitId() {
+        return objectToOrbitId;
     }
 
     public SpaceObject getObjectToOrbit() {
