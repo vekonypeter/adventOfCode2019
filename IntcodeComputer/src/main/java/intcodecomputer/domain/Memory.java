@@ -1,10 +1,8 @@
 package intcodecomputer.domain;
 
-import java.util.Arrays;
-
 public class Memory {
 
-    Integer[] values;
+    long[] values;
     int pointer;
     int relativeBase;
 
@@ -26,14 +24,18 @@ public class Memory {
     }
 
     public void loadProgram(String programString) {
-        values = Arrays.stream(programString.split(",")).map(Integer::parseInt).toArray(Integer[]::new);
+        String[] stringValues = programString.split(",");
+        values = new long[stringValues.length * 10];
+        for (int i = 0; i < stringValues.length; i++) {
+            values[i] = Long.parseLong(stringValues[i]);
+        }
     }
 
-    public Integer getValue(int address) {
+    public long getValue(int address) {
         return values[address];
     }
 
-    public void setValue(int address, int value) {
+    public void setValue(int address, long value) {
         values[address] = value;
     }
 
@@ -41,13 +43,17 @@ public class Memory {
         pointer += move;
     }
 
+    public void moveRelativeBase(int move) {
+        relativeBase += move;
+    }
+
     public int size() {
         return values.length;
     }
 
     public void print() {
-        System.out.println("MEMORY {" + size() + "}, POINTER: " + pointer);
-        for (Integer value : values) {
+        System.out.println("MEMORY LENGTH: " + size() + "; POINTER: " + pointer + "; RELATIVE BASE: " + relativeBase);
+        for (long value : values) {
             System.out.print(value + ",");
         }
         System.out.println();

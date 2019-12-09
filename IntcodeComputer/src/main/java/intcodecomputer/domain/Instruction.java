@@ -89,6 +89,10 @@ public class Instruction {
                 }
                 memory.movePointer(this.getLength());
                 break;
+            case 9:
+                memory.moveRelativeBase(getParamValue(memory, 0));
+                memory.movePointer(this.getLength());
+                break;
             case 99:
                 throw new ProgramHaltedException();
             default:
@@ -102,6 +106,8 @@ public class Instruction {
                 return memory.getValue(params[paramIndex]);
             case 1:
                 return params[paramIndex];
+            case 2:
+                return memory.getValue(params[paramIndex] + memory.getRelativeBase());
             default:
                 throw new RuntimeException(String.format("Unknown parameter mode: %s", paramModes[paramIndex]));
         }
@@ -128,6 +134,7 @@ public class Instruction {
             case 3:
                 return new Instruction(opcode, memory.getValue(pointer + 1));
             case 4:
+            case 9:
                 return new Instruction(opcode,
                         new Integer[]{memory.getValue(pointer + 1)},
                         new Integer[]{param1Mode}

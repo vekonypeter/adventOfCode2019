@@ -9,15 +9,23 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
-        String memoryString = Files.readAllLines(Paths.get(Main.class.getResource("/day_5_input.txt").toURI()), StandardCharsets.UTF_8).get(0);
+        List<String> memoryStrings = Files.readAllLines(Paths.get(Main.class.getResource("/day_9_1_examples.txt").toURI()), StandardCharsets.UTF_8);
 
-        Memory memory = new Memory();
-        memory.loadProgram(memoryString);
+        memoryStrings.forEach(memoryString -> {
+            System.out.println(">>> RUNNING PROGRAM...");
+            Memory memory = new Memory();
+            memory.loadProgram(memoryString);
+            runProgram(memory);
+            System.out.println(">>> PROGRAM DONE!\n");
+        });
+    }
 
+    private static void runProgram(Memory memory) {
         try {
             while (true) {
                 var instruction = Instruction.getNext(memory);
@@ -32,6 +40,5 @@ public class Main {
             System.out.println("VERB: " + memory.getValue(2));
         }
     }
-
 
 }
