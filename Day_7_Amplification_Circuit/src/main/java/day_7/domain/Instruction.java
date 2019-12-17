@@ -6,36 +6,36 @@ import java.util.Scanner;
 
 public class Instruction {
 
-    private static final Scanner SCANNER = new Scanner(System.in);
+    private static final IOHandler ioHandler = new IOHandler();
 
     private Integer opcode;
     private Integer[] params;
     private Integer[] paramModes;
     private Integer outputAddress;
 
-    public Instruction(Integer opcode) {
+    private Instruction(Integer opcode) {
         this.opcode = opcode;
     }
 
-    public Instruction(Integer opcode, Integer outputAddress) {
+    private Instruction(Integer opcode, Integer outputAddress) {
         this.opcode = opcode;
         this.outputAddress = outputAddress;
     }
 
-    public Instruction(Integer opcode, Integer[] params, Integer[] paramModes) {
+    private Instruction(Integer opcode, Integer[] params, Integer[] paramModes) {
         this.opcode = opcode;
         this.params = params;
         this.paramModes = paramModes;
     }
 
-    public Instruction(Integer opcode, Integer[] params, Integer[] paramModes, Integer outputAddress) {
+    private Instruction(Integer opcode, Integer[] params, Integer[] paramModes, Integer outputAddress) {
         this.opcode = opcode;
         this.params = params;
         this.paramModes = paramModes;
         this.outputAddress = outputAddress;
     }
 
-    public int getLength() {
+    private int getLength() {
         return 1 + (params != null ? params.length : 0) + (outputAddress != null ? 1 : 0);
     }
 
@@ -50,13 +50,12 @@ public class Instruction {
                 memory.movePointer(this.getLength());
                 break;
             case 3:
-                System.out.print("INPUT NEEDED: ");
-                int input = Integer.parseInt(SCANNER.nextLine());
+                int input = IOHandler.getInput();
                 memory.setValue(this.outputAddress, input);
                 memory.movePointer(this.getLength());
                 break;
             case 4:
-                System.out.println("OUTPUT GENERATED: " + getParamValue(memory, 0));
+                IOHandler.produceOutput(getParamValue(memory, 0));
                 memory.movePointer(this.getLength());
                 break;
             case 5:
