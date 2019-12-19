@@ -3,18 +3,18 @@ package intcodecomputer.domain;
 public class Memory {
 
     long[] values;
-    int pointer;
-    int relativeBase;
+    long pointer;
+    long relativeBase;
 
-    public int getPointer() {
+    public long getPointer() {
         return pointer;
     }
 
-    public void setPointer(int pointer) {
+    public void setPointer(long pointer) {
         this.pointer = pointer;
     }
 
-    public int getRelativeBase() {
+    public long getRelativeBase() {
         return relativeBase;
     }
 
@@ -31,19 +31,19 @@ public class Memory {
         }
     }
 
-    public long getValue(int address) {
-        return values[address];
+    public long getValue(long address) {
+        return values[(int)address];
     }
 
-    public void setValue(int address, long value) {
-        values[address] = value;
+    public void setValue(long address, long value) {
+        values[(int)address] = value;
     }
 
-    public void movePointer(int move) {
+    public void movePointer(long move) {
         pointer += move;
     }
 
-    public void moveRelativeBase(int move) {
+    public void moveRelativeBase(long move) {
         relativeBase += move;
     }
 
