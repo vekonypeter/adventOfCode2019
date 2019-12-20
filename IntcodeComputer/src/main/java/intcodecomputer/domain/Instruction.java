@@ -10,15 +10,9 @@ public class Instruction {
   private Long opcode;
   private Long[] params;
   private Long[] paramModes;
-  private Long outputAddress;
 
   public Instruction(Long opcode) {
     this.opcode = opcode;
-  }
-
-  public Instruction(Long opcode, Long outputAddress) {
-    this.opcode = opcode;
-    this.outputAddress = outputAddress;
   }
 
   public Instruction(Long opcode, Long[] params, Long[] paramModes) {
@@ -27,69 +21,62 @@ public class Instruction {
     this.paramModes = paramModes;
   }
 
-  public Instruction(Long opcode, Long[] params, Long[] paramModes, Long outputAddress) {
-    this.opcode = opcode;
-    this.params = params;
-    this.paramModes = paramModes;
-    this.outputAddress = outputAddress;
-  }
-
   public int getLength() {
-    return 1 + (params != null ? params.length : 0) + (outputAddress != null ? 1 : 0);
+    return 1 + (params != null ? params.length : 0);
   }
 
   public void executeOnMemory(Memory memory) {
     switch (opcode.intValue()) {
       case 1:
-        memory.setValue(this.outputAddress, getParamValue(memory, 0) + getParamValue(memory, 1));
+        setMemoryValue(memory, getMemoryValue(memory, 0) + getMemoryValue(memory, 1), 2);
         memory.movePointer(this.getLength());
         break;
       case 2:
-        memory.setValue(this.outputAddress, getParamValue(memory, 0) * getParamValue(memory, 1));
+        setMemoryValue(memory, getMemoryValue(memory, 0) * getMemoryValue(memory, 1), 2);
         memory.movePointer(this.getLength());
         break;
       case 3:
         System.out.print("INPUT NEEDED: ");
         int input = Integer.parseInt(SCANNER.nextLine());
-        memory.setValue(this.outputAddress, input);
+        setMemoryValue(memory, input, 0);
         memory.movePointer(this.getLength());
         break;
       case 4:
-        System.out.println("OUTPUT GENERATED: " + getParamValue(memory, 0));
+        System.out.println("OUTPUT GENERATED: " + getMemoryValue(memory, 0));
         memory.movePointer(this.getLength());
         break;
       case 5:
-        if (getParamValue(memory, 0) != 0) {
-          memory.setPointer(getParamValue(memory, 1));
+        if (getMemoryValue(memory, 0) != 0) {
+          memory.setPointer(getMemoryValue(memory, 1));
         } else {
           memory.movePointer(this.getLength());
         }
         break;
       case 6:
-        if (getParamValue(memory, 0) == 0) {
-          memory.setPointer(getParamValue(memory, 1));
+        if (getMemoryValue(memory, 0) == 0) {
+          memory.setPointer(getMemoryValue(memory, 1));
         } else {
           memory.movePointer(this.getLength());
         }
         break;
       case 7:
-        if (getParamValue(memory, 0) < getParamValue(memory, 1)) {
-          memory.setValue(this.outputAddress, 1);
+        if (getMemoryValue(memory, 0) < getMemoryValue(memory, 1)) {
+          setMemoryValue(memory, 1, 2);
         } else {
-          memory.setValue(this.outputAddress, 0);
+          setMemoryValue(memory, 0, 2);
         }
         memory.movePointer(this.getLength());
         break;
       case 8:
-        if (getParamValue(memory, 0).equals(getParamValue(memory, 1))) {
-          memory.setValue(this.outputAddress, 1);
+        if (getMemoryValue(memory, 0).equals(getMemoryValue(memory, 1))) {
+          setMemoryValue(memory, 1, 2);
         } else {
-          memory.setValue(this.outputAddress, 0);
+          setMemoryValue(memory, 0, 2);
         }
         memory.movePointer(this.getLength());
         break;
       case 9:
-        memory.moveRelativeBase(getParamValue(memory, 0));
+        memory.moveRelativeBase(getMemoryValue(memory, 0));
         memory.movePointer(this.getLength());
         break;
       case 99:
@@ -100,7 +87,7 @@ public class Instruction {
     }
   }
 
-  private Long getParamValue(Memory memory, int paramIndex) {
+  private Long getMemoryValue(Memory memory, int paramIndex) {
     switch (paramModes[paramIndex].intValue()) {
       case 0:
         return memory.getValue(params[paramIndex]);
@@ -110,7 +97,23 @@ public class Instruction {
         return memory.getValue(params[paramIndex] + memory.getRelativeBase());
       default:
         throw new RuntimeException(
-            String.format("Unknown parameter mode: %s", paramModes[paramIndex]));
+            String.format(
+                "Unknown parameter mode for getting memory value: %s", paramModes[paramIndex]));
+    }
+  }
+
+  private void setMemoryValue(Memory memory, long value, int paramIndex) {
+    switch (paramModes[paramIndex].intValue()) {
+      case 0:
+        memory.setValue(params[paramIndex], value);
+        break;
+      case 2:
+        memory.setValue(params[paramIndex] + memory.getRelativeBase(), value);
+        break;
+      default:
+        throw new RuntimeException(
+            String.format(
+                "Unknown parameter mode for setting memory value: %s", paramModes[paramIndex]));
     }
   }
 
@@ -120,6 +123,7 @@ public class Instruction {
     long opcode = currentValue % 100;
     long param1Mode = (currentValue % 1000) / 100;
     long param2Mode = (currentValue % 10000) / 1000;
+    long param3Mode = (currentValue % 100000) / 10000;
 
     switch ((int) opcode) {
       case 1:
@@ -128,11 +132,13 @@ public class Instruction {
       case 8:
         return new Instruction(
             opcode,
-            new Long[] {memory.getValue(pointer + 1), memory.getValue(pointer + 2)},
-            new Long[] {param1Mode, param2Mode},
-            memory.getValue(pointer + 3));
+            new Long[] {
+              memory.getValue(pointer + 1),
+              memory.getValue(pointer + 2),
+              memory.getValue(pointer + 3)
+            },
+            new Long[] {param1Mode, param2Mode, param3Mode});
       case 3:
-        return new Instruction(opcode, memory.getValue(pointer + 1));
       case 4:
       case 9:
         return new Instruction(
@@ -142,8 +148,7 @@ public class Instruction {
         return new Instruction(
             opcode,
             new Long[] {memory.getValue(pointer + 1), memory.getValue(pointer + 2)},
-            new Long[] {param1Mode, param2Mode},
-            null);
+            new Long[] {param1Mode, param2Mode});
       case 99:
         return new Instruction(opcode);
       default:
