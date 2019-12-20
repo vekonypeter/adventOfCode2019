@@ -26,6 +26,28 @@ public class Coordinate {
     this.y = y;
   }
 
+  //
+  //  tanAlpha = y / x
+  //
+  public double getAngleWithOtherCoordinate(Coordinate that) {
+    double x = (double) Math.max(this.x, that.x) - Math.min(this.x, that.x);
+    double y = (double) Math.max(this.y, that.y) - Math.min(this.y, that.y);
+
+    double tanAplha = y / x;
+    double angle = Math.toDegrees(Math.atan(tanAplha));
+
+    if (that.x < this.x && that.y > this.y) {
+      angle += 90;
+    }
+    else if (that.x < this.x && that.y < this.y) {
+      angle += 180;
+    }
+    else if (that.x > this.x && that.y < this.y) {
+      angle += 270;
+    }
+
+    return angle;
+  }
 
   @Override
   public boolean equals(Object o) {
