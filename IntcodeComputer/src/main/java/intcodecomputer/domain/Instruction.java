@@ -1,21 +1,36 @@
 package intcodecomputer.domain;
 
 import intcodecomputer.domain.exception.ProgramHaltedException;
-import java.util.Scanner;
 
 public class Instruction {
 
-  private static final Scanner SCANNER = new Scanner(System.in);
+  // TODO: refactor class structure
+  private Memory memory;
+  private InputProvider inputProvider;
+  private OutputHandler outputHandler;
 
   private Long opcode;
   private Long[] params;
   private Long[] paramModes;
 
-  public Instruction(Long opcode) {
+  public Instruction(
+      Memory memory, InputProvider inputProvider, OutputHandler outputHandler, Long opcode) {
+    this.memory = memory;
+    this.inputProvider = inputProvider;
+    this.outputHandler = outputHandler;
     this.opcode = opcode;
   }
 
-  public Instruction(Long opcode, Long[] params, Long[] paramModes) {
+  public Instruction(
+      Memory memory,
+      InputProvider inputProvider,
+      OutputHandler outputHandler,
+      Long opcode,
+      Long[] params,
+      Long[] paramModes) {
+    this.memory = memory;
+    this.inputProvider = inputProvider;
+    this.outputHandler = outputHandler;
     this.opcode = opcode;
     this.params = params;
     this.paramModes = paramModes;
@@ -25,58 +40,57 @@ public class Instruction {
     return 1 + (params != null ? params.length : 0);
   }
 
-  public void executeOnMemory(Memory memory) {
+  public void executeOnMemory() {
     switch (opcode.intValue()) {
       case 1:
-        setMemoryValue(memory, getMemoryValue(memory, 0) + getMemoryValue(memory, 1), 2);
+        setMemoryValue(getMemoryValue(0) + getMemoryValue(1), 2);
         memory.movePointer(this.getLength());
         break;
       case 2:
-        setMemoryValue(memory, getMemoryValue(memory, 0) * getMemoryValue(memory, 1), 2);
+        setMemoryValue(getMemoryValue(0) * getMemoryValue(1), 2);
         memory.movePointer(this.getLength());
         break;
       case 3:
-        System.out.print("INPUT NEEDED: ");
-        int input = Integer.parseInt(SCANNER.nextLine());
-        setMemoryValue(memory, input, 0);
+        long input = inputProvider.getInput();
+        setMemoryValue(input, 0);
         memory.movePointer(this.getLength());
         break;
       case 4:
-        System.out.println("OUTPUT GENERATED: " + getMemoryValue(memory, 0));
+        outputHandler.handleOutput(getMemoryValue(0));
         memory.movePointer(this.getLength());
         break;
       case 5:
-        if (getMemoryValue(memory, 0) != 0) {
-          memory.setPointer(getMemoryValue(memory, 1));
+        if (getMemoryValue(0) != 0) {
+          memory.setPointer(getMemoryValue(1));
         } else {
           memory.movePointer(this.getLength());
         }
         break;
       case 6:
-        if (getMemoryValue(memory, 0) == 0) {
-          memory.setPointer(getMemoryValue(memory, 1));
+        if (getMemoryValue(0) == 0) {
+          memory.setPointer(getMemoryValue(1));
         } else {
           memory.movePointer(this.getLength());
         }
         break;
       case 7:
-        if (getMemoryValue(memory, 0) < getMemoryValue(memory, 1)) {
-          setMemoryValue(memory, 1, 2);
+        if (getMemoryValue(0) < getMemoryValue(1)) {
+          setMemoryValue(1, 2);
         } else {
-          setMemoryValue(memory, 0, 2);
+          setMemoryValue(0, 2);
         }
         memory.movePointer(this.getLength());
         break;
       case 8:
-        if (getMemoryValue(memory, 0).equals(getMemoryValue(memory, 1))) {
-          setMemoryValue(memory, 1, 2);
+        if (getMemoryValue(0).equals(getMemoryValue(1))) {
+          setMemoryValue(1, 2);
         } else {
-          setMemoryValue(memory, 0, 2);
+          setMemoryValue(0, 2);
         }
         memory.movePointer(this.getLength());
         break;
       case 9:
-        memory.moveRelativeBase(getMemoryValue(memory, 0));
+        memory.moveRelativeBase(getMemoryValue(0));
         memory.movePointer(this.getLength());
         break;
       case 99:
@@ -87,7 +101,7 @@ public class Instruction {
     }
   }
 
-  private Long getMemoryValue(Memory memory, int paramIndex) {
+  private Long getMemoryValue(int paramIndex) {
     switch (paramModes[paramIndex].intValue()) {
       case 0:
         return memory.getValue(params[paramIndex]);
@@ -102,7 +116,7 @@ public class Instruction {
     }
   }
 
-  private void setMemoryValue(Memory memory, long value, int paramIndex) {
+  private void setMemoryValue(long value, int paramIndex) {
     switch (paramModes[paramIndex].intValue()) {
       case 0:
         memory.setValue(params[paramIndex], value);
@@ -117,7 +131,8 @@ public class Instruction {
     }
   }
 
-  public static Instruction getNext(Memory memory) {
+  public static Instruction getNext(
+      Memory memory, InputProvider inputProvider, OutputHandler outputHandler) {
     long pointer = memory.getPointer();
     long currentValue = memory.getValue(pointer);
     long opcode = currentValue % 100;
@@ -131,6 +146,9 @@ public class Instruction {
       case 7:
       case 8:
         return new Instruction(
+            memory,
+            inputProvider,
+            outputHandler,
             opcode,
             new Long[] {
               memory.getValue(pointer + 1),
@@ -142,15 +160,23 @@ public class Instruction {
       case 4:
       case 9:
         return new Instruction(
-            opcode, new Long[] {memory.getValue(pointer + 1)}, new Long[] {param1Mode});
+            memory,
+            inputProvider,
+            outputHandler,
+            opcode,
+            new Long[] {memory.getValue(pointer + 1)},
+            new Long[] {param1Mode});
       case 5:
       case 6:
         return new Instruction(
+            memory,
+            inputProvider,
+            outputHandler,
             opcode,
             new Long[] {memory.getValue(pointer + 1), memory.getValue(pointer + 2)},
             new Long[] {param1Mode, param2Mode});
       case 99:
-        return new Instruction(opcode);
+        return new Instruction(memory, inputProvider, outputHandler, opcode);
       default:
         throw new RuntimeException(
             String.format("Unknown opcode '%s' found during parse-time!", opcode));

@@ -1,6 +1,10 @@
 package intcodecomputer;
 
+import intcodecomputer.domain.ConsoleInputProvider;
+import intcodecomputer.domain.ConsoleOutputHandler;
+import intcodecomputer.domain.InputProvider;
 import intcodecomputer.domain.IntcodeComputer;
+import intcodecomputer.domain.OutputHandler;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -15,9 +19,12 @@ public class Main {
         Files.readAllLines(
             Paths.get(Main.class.getResource("/day_9_input.txt").toURI()), StandardCharsets.UTF_8);
 
+    InputProvider inputProvider = new ConsoleInputProvider();
+    OutputHandler outputHandler = new ConsoleOutputHandler();
+
     memoryStrings.forEach(
         memoryString -> {
-          var computer = new IntcodeComputer();
+          var computer = new IntcodeComputer(inputProvider, outputHandler);
           computer.init(memoryString);
           computer.run();
         });
