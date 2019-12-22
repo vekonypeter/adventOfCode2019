@@ -1,8 +1,6 @@
 package intcodecomputer;
 
-import intcodecomputer.domain.Instruction;
-import intcodecomputer.domain.Memory;
-import intcodecomputer.domain.exception.ProgramHaltedException;
+import intcodecomputer.domain.IntcodeComputer;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -19,26 +17,9 @@ public class Main {
 
     memoryStrings.forEach(
         memoryString -> {
-          System.out.println(">>> RUNNING PROGRAM...");
-          Memory memory = new Memory();
-          memory.loadProgram(memoryString);
-          runProgram(memory);
-          System.out.println(">>> PROGRAM DONE!\n");
+          var computer = new IntcodeComputer();
+          computer.init(memoryString);
+          computer.run();
         });
-  }
-
-  private static void runProgram(Memory memory) {
-    try {
-      while (true) {
-        var instruction = Instruction.getNext(memory);
-        instruction.executeOnMemory(memory);
-        // memory.print();
-      }
-    } catch (ProgramHaltedException e) {
-      System.out.println(e.getMessage());
-      // System.out.println("OUTPUT: " + memory.getValue(0));
-      // System.out.println("NOUN: " + memory.getValue(1));
-      // System.out.println("VERB: " + memory.getValue(2));
-    }
   }
 }
