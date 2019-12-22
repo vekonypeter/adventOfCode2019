@@ -2,7 +2,7 @@ package intcodecomputer;
 
 import intcodecomputer.domain.Instruction;
 import intcodecomputer.domain.Memory;
-import intcodecomputer.domain.expection.ProgramHaltedException;
+import intcodecomputer.domain.exception.ProgramHaltedException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;

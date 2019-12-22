@@ -1,6 +1,6 @@
 package intcodecomputer.domain;
 
-import intcodecomputer.domain.expection.ProgramHaltedException;
+import intcodecomputer.domain.exception.ProgramHaltedException;
 import java.util.Scanner;
 
 public class Instruction {

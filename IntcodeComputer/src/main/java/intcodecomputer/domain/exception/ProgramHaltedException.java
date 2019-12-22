@@ -1,4 +1,4 @@
-package intcodecomputer.domain.expection;
+package intcodecomputer.domain.exception;
 
 public class ProgramHaltedException extends RuntimeException {
     public ProgramHaltedException() {
