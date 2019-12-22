@@ -30,23 +30,27 @@ public class Coordinate {
   //  tanAlpha = y / x
   //
   public double getAngleWithOtherCoordinate(Coordinate that) {
-    double x = (double) Math.max(this.x, that.x) - Math.min(this.x, that.x);
-    double y = (double) Math.max(this.y, that.y) - Math.min(this.y, that.y);
+    double x = Math.abs(this.x - that.x);
+    double y = Math.abs(this.y - that.y);
 
     double tanAplha = y / x;
     double angle = Math.toDegrees(Math.atan(tanAplha));
 
     if (that.x < this.x && that.y > this.y) {
       angle += 90;
-    }
-    else if (that.x < this.x && that.y < this.y) {
+    } else if (that.x < this.x && that.y < this.y) {
       angle += 180;
-    }
-    else if (that.x > this.x && that.y < this.y) {
+    } else if (that.x > this.x && that.y < this.y) {
       angle += 270;
     }
 
     return angle;
+  }
+
+  public double getDistanceFromOtherCoordinate(Coordinate that) {
+    double x = Math.abs(this.x - that.x);
+    double y = Math.abs(this.y - that.y);
+    return Math.sqrt(x * x + y * x);
   }
 
   @Override
