@@ -1,0 +1,5 @@
+intcodecomputer/domain/exception/ProgramHaltedException.class
+intcodecomputer/Main.class
+intcodecomputer/domain/Instruction.class
+intcodecomputer/domain/Memory.class
+intcodecomputer/domain/IntcodeComputer.class
