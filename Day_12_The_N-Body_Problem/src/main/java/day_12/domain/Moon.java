@@ -72,4 +72,48 @@ public class Moon {
     return "Moon{" + "name='" + name + '\'' + ", xPos=" + xPos + ", yPos=" + yPos + ", zPos=" + zPos
         + ", xVel=" + xVel + ", yVel=" + yVel + ", zVel=" + zVel + '}';
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Moon moon = (Moon) o;
+
+    if (xPos != moon.xPos) {
+      return false;
+    }
+    if (yPos != moon.yPos) {
+      return false;
+    }
+    if (zPos != moon.zPos) {
+      return false;
+    }
+    if (xVel != moon.xVel) {
+      return false;
+    }
+    if (yVel != moon.yVel) {
+      return false;
+    }
+    if (zVel != moon.zVel) {
+      return false;
+    }
+    return name.equals(moon.name);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = name.hashCode();
+    result = 31 * result + xPos;
+    result = 31 * result + yPos;
+    result = 31 * result + zPos;
+    result = 31 * result + xVel;
+    result = 31 * result + yVel;
+    result = 31 * result + zVel;
+    return result;
+  }
 }
