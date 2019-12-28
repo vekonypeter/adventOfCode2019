@@ -1,6 +1,6 @@
 package day_14;
 
-import day_14.domain.Chemical;
+import day_14.domain.Reaction;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -21,14 +21,20 @@ public class Main {
             Paths.get(Main.class.getResource("/" + fileName + ".txt").toURI()),
             StandardCharsets.UTF_8);
 
-    Map<String, Chemical> chemicals =
+    Map<String, Reaction> reactions =
         input.stream()
-            .map(Chemical::parse)
-            .collect(Collectors.toMap(Chemical::getId, Function.identity()));
+            .map(Reaction::parse)
+            .collect(Collectors.toMap(Reaction::getOutput, Function.identity()));
 
-    Map<String, Integer> recipe =
-        chemicals.get("FUEL").getInputsForReaction(1, chemicals);
+    Map<String, Integer> inputs =
+        reactions.keySet().stream().collect(Collectors.toMap(Function.identity(), chemicalId -> 0));
+    inputs.put("ORE", 0);
+    Map<String, Integer> leftOvers =
+        reactions.keySet().stream().collect(Collectors.toMap(Function.identity(), chemicalId -> 0));
 
-    System.out.println("ORE NEEDED FOR 1 FUEL: " + recipe.get("ORE"));
+    Map<Integer, List<Reaction>> chain = new HashMap<>();
+    reactions.get("FUEL").getReactionChain(reactions, chain, 0);
+
+    System.out.println("ORE NEEDED FOR 1 FUEL: " + inputs.get("ORE"));
   }
 }
