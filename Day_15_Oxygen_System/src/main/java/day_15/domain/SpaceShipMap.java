@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+// TODO: replace int[] with a Coordinate or Position class
 public class SpaceShipMap {
 
   private RepairDroid repairDroid;
@@ -63,6 +65,18 @@ public class SpaceShipMap {
 
     Direction fallbackDirection = repairDroid.popDirection();
     return fallbackDirection.getOpposite();
+  }
+
+  public int fillWithOxygen() {
+    startOxygenFilling();
+    System.out.println(this.toString());
+    int steps = 0;
+
+    while (runOxygenFillingStep() > 0) {
+      System.out.println(this.toString());
+      steps++;
+    }
+    return steps;
   }
 
   private Map<Direction, Integer> getObjectsAroundCoordinate(int x, int y) {
@@ -163,6 +177,47 @@ public class SpaceShipMap {
     return coordinates.size();
   }
 
+  private void startOxygenFilling() {
+    int x = 0;
+    int y = 0;
+    while (y < getHeight() && !Integer.valueOf(2).equals(coordinates.get(y).get(x))) {
+      x++;
+      if (x == getWidth()) {
+        x = 0;
+        y++;
+      }
+    }
+    coordinates.get(y).set(x, 10);
+  }
+
+  private int runOxygenFillingStep() {
+    List<int[]> coordinatesToFill = getCorridorCoordinatesWithoutOxygen();
+
+    var coordinatesCanBeFilledNow =
+        coordinatesToFill.stream()
+            .filter(this::hasNeighbourWithOxygen)
+            .collect(Collectors.toList());
+    coordinatesCanBeFilledNow.forEach(coords -> coordinates.get(coords[1]).set(coords[0], 10));
+    return coordinatesCanBeFilledNow.size();
+  }
+
+  private List<int[]> getCorridorCoordinatesWithoutOxygen() {
+    List<int[]> result = new ArrayList<>();
+    for (int y = 0; y < coordinates.size(); y++) {
+      for (int x = 0; x < coordinates.get(y).size(); x++) {
+        Integer value = coordinates.get(y).get(x);
+        if (value != null && value.equals(1)) {
+          result.add(new int[] {x, y});
+        }
+      }
+    }
+    return result;
+  }
+
+  private boolean hasNeighbourWithOxygen(int[] coords) {
+    return getObjectsAroundCoordinate(coords[0], coords[1]).containsValue(10);
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder("\nSPACESHIPMAP >>>>>>>>>>>>>>>>>>>>>>>>\n\n");
@@ -173,17 +228,20 @@ public class SpaceShipMap {
         } else {
           var cord = coordinates.get(y).get(x);
           if (cord == null) {
-            builder.append(" ");
+            builder.append(".");
           } else {
             switch (cord) {
               case 0:
-                builder.append("#");
+                builder.append("\u2588");
                 break;
               case 1:
-                builder.append(".");
+                builder.append(" ");
                 break;
               case 2:
                 builder.append("+");
+                break;
+              case 10:
+                builder.append("O");
                 break;
               default:
                 builder.append("?");
