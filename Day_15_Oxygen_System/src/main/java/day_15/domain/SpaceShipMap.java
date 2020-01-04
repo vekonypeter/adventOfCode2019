@@ -1,6 +1,6 @@
 package day_15.domain;
 
-import day_15.domain.exception.OxygenSystemReachedException;
+import day_15.domain.exception.NoMoreReacheableCoordinateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,16 +25,11 @@ public class SpaceShipMap {
   }
 
   public Map<Direction, Integer> getObjectsAroundDroid() {
-    Map<Direction, Integer> objects = new EnumMap<>(Direction.class);
-    objects.put(Direction.NORTH, getAtPosition(getTargetPos(Direction.NORTH)));
-    objects.put(Direction.EAST, getAtPosition(getTargetPos(Direction.EAST)));
-    objects.put(Direction.SOUTH, getAtPosition(getTargetPos(Direction.SOUTH)));
-    objects.put(Direction.WEST, getAtPosition(getTargetPos(Direction.WEST)));
-    return objects;
+    return getObjectsAroundCoordinate(repairDroidPosX, repairDroidPosY);
   }
 
   public void update(Direction direction, int droidOutput) {
-    int[] targetPos = getTargetPos(direction);
+    int[] targetPos = getTargetPos(direction, repairDroidPosX, repairDroidPosY);
     targetPos = expandMap(targetPos);
     int targetPosX = targetPos[0];
     int targetPosY = targetPos[1];
@@ -42,54 +37,55 @@ public class SpaceShipMap {
     boolean isUndiscovered = coordinates.get(targetPosY).get(targetPosX) == null;
     coordinates.get(targetPosY).set(targetPosX, droidOutput);
 
-    if (droidOutput == 1) {
+    if (droidOutput >= 1) {
       repairDroidPosX = targetPosX;
       repairDroidPosY = targetPosY;
 
       if (isUndiscovered) {
         repairDroid.pushDirection(direction);
       }
-    } else if (droidOutput == 2) {
-      throw new OxygenSystemReachedException(repairDroid.getPositionHistorySize() + 1);
+    }
+    // PART 1.
+    //    if (droidOutput == 2) {
+    //      throw new OxygenSystemReachedException(repairDroid.getPositionHistorySize());
+    //    }
+
+    // PART 2.
+    if (!hasUndiscoveredReachableCoordinate()) {
+      throw new NoMoreReacheableCoordinateException();
     }
   }
 
   public Direction fallback() {
+    if (!hasUndiscoveredReachableCoordinate()) {
+      throw new NoMoreReacheableCoordinateException();
+    }
+
     Direction fallbackDirection = repairDroid.popDirection();
     return fallbackDirection.getOpposite();
   }
 
-  private Integer getAtPosition(int[] coords) {
-    return getAtPosition(coords[0], coords[1]);
+  private Map<Direction, Integer> getObjectsAroundCoordinate(int x, int y) {
+    Map<Direction, Integer> objects = new EnumMap<>(Direction.class);
+    objects.put(Direction.NORTH, getAtPosition(getTargetPos(Direction.NORTH, x, y)));
+    objects.put(Direction.EAST, getAtPosition(getTargetPos(Direction.EAST, x, y)));
+    objects.put(Direction.SOUTH, getAtPosition(getTargetPos(Direction.SOUTH, x, y)));
+    objects.put(Direction.WEST, getAtPosition(getTargetPos(Direction.WEST, x, y)));
+    return objects;
   }
 
-  private Integer getAtPosition(int x, int y) {
-    if (0 <= x && x < getWidth() && 0 <= y && y < getHeight()) {
-      return coordinates.get(y).get(x);
-    }
-    return null;
-  }
-
-  private int getWidth() {
-    return coordinates.get(0).size();
-  }
-
-  private int getHeight() {
-    return coordinates.size();
-  }
-
-  private int[] getTargetPos(Direction direction) {
+  private int[] getTargetPos(Direction direction, int x, int y) {
     switch (direction) {
       case NORTH:
-        return new int[] {repairDroidPosX, repairDroidPosY - 1};
+        return new int[] {x, y - 1};
       case SOUTH:
-        return new int[] {repairDroidPosX, repairDroidPosY + 1};
+        return new int[] {x, y + 1};
       case WEST:
-        return new int[] {repairDroidPosX - 1, repairDroidPosY};
+        return new int[] {x - 1, y};
       case EAST:
-        return new int[] {repairDroidPosX + 1, repairDroidPosY};
+        return new int[] {x + 1, y};
       default:
-        return new int[] {repairDroidPosX, repairDroidPosY};
+        return new int[] {x, y};
     }
   }
 
@@ -132,6 +128,39 @@ public class SpaceShipMap {
 
   private void expandToEast() {
     coordinates.forEach(line -> line.add(null));
+  }
+
+  private boolean hasUndiscoveredReachableCoordinate() {
+    for (int y = 0; y < coordinates.size(); y++) {
+      for (int x = 0; x < coordinates.get(y).size(); x++) {
+        var valueAtPos = getAtPosition(x, y);
+        if (valueAtPos != null
+            && valueAtPos >= 1
+            && getObjectsAroundCoordinate(x, y).containsValue(null)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private Integer getAtPosition(int[] coords) {
+    return getAtPosition(coords[0], coords[1]);
+  }
+
+  private Integer getAtPosition(int x, int y) {
+    if (0 <= x && x < getWidth() && 0 <= y && y < getHeight()) {
+      return coordinates.get(y).get(x);
+    }
+    return null;
+  }
+
+  private int getWidth() {
+    return coordinates.get(0).size();
+  }
+
+  private int getHeight() {
+    return coordinates.size();
   }
 
   @Override

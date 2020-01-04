@@ -27,6 +27,9 @@ public class RepairDroid {
   }
 
   public Direction popDirection() {
+    if (previousPositions.isEmpty()) {
+      return null;
+    }
     return previousPositions.remove(previousPositions.size() - 1);
   }
 

@@ -3,7 +3,6 @@ package day_15;
 import day_15.domain.Direction;
 import day_15.domain.RepairDroid;
 import day_15.domain.SpaceShipMap;
-import day_15.domain.exception.OxygenSystemReachedException;
 import intcodecomputer.domain.ConsoleInputProvider;
 import intcodecomputer.domain.InputProvider;
 import intcodecomputer.domain.OutputHandler;
@@ -36,12 +35,17 @@ public class Main {
 
     repairDroid.init(input, inputProvider, outputHandler);
 
-    try {
-      repairDroid.run();
-    }
-    catch (OxygenSystemReachedException e) {
-      System.out.println(e.getMessage());
-    }
+    // try {
+    repairDroid.run();
+    // }
+    // PART 1.
+    //    catch (OxygenSystemReachedException e) {
+    //      System.out.println(e.getMessage());
+    //    }
+    // PART 2.
+    //    catch (NoMoreReacheableCoordinateException e) {
+    //      System.out.println(e.getMessage());
+    //    }
   }
 
   private interface RepairDroidInputProvider extends InputProvider {
