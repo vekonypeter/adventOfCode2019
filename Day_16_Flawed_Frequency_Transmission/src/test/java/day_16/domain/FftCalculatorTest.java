@@ -1,16 +1,17 @@
 package day_16.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FftCalculatorTest {
 
   @Test
   public void calculateOnePhaseForShortInput() {
     List<Integer> input = List.of(1, 2, 3, 4, 5, 6, 7, 8);
-    List<Integer> output = FftCalculator.calculate(input);
+    List<Integer> output = FftCalculator.calculate(input, 1);
     assertThat(output).containsExactly(4, 8, 2, 2, 6, 1, 5, 8);
   }
 
@@ -63,5 +64,15 @@ public class FftCalculatorTest {
             8, 7, 3);
     List<Integer> output = FftCalculator.calculate(input, 100);
     assertThat(output.subList(0, 8)).containsExactly(5, 2, 4, 3, 2, 1, 3, 3);
+  }
+
+  @Test
+  public void getMessage_1() {
+    List<Integer> input =
+        List.of(
+            0, 3, 0, 3, 6, 7, 3, 2, 5, 7, 7, 2, 1, 2, 9, 4, 4, 0, 6, 3, 4, 9, 1, 5, 6, 5, 4, 7, 4,
+            6, 6, 4);
+    List<Integer> message = FftCalculator.getMessage(input);
+    assertThat(message).containsExactly(8, 4, 4, 6, 2, 0, 2, 6);
   }
 }
